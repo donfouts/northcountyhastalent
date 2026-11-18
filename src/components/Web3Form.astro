@@ -1,0 +1,36 @@
+---
+// Static-site form: posts straight to Web3Forms, which emails the submission.
+// The access key is tied to the destination inbox (set PUBLIC_WEB3FORMS_KEY).
+interface Props {
+  subject: string;
+  id?: string;
+  submitLabel?: string;
+}
+const { subject, id = 'form', submitLabel = 'Send' } = Astro.props;
+const key = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
+---
+
+<form class="form" id={id} action="https://api.web3forms.com/submit" method="POST" data-web3form>
+  <input type="hidden" name="access_key" value={key ?? ''} />
+  <input type="hidden" name="subject" value={subject} />
+  <input type="hidden" name="from_name" value="North County Has Talent website" />
+  <input type="hidden" name="redirect" value="" data-redirect />
+  <!-- honeypot: bots fill it, people never see it -->
+  <input type="checkbox" name="botcheck" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+  {!key && <p class="form-warning full">Demo mode: this form isn't connected to an inbox yet.</p>}
+
+  <slot />
+
+  <div class="full btn-row" style="align-items: center;">
+    <button class="btn btn-primary" type="submit">{submitLabel}</button>
+    <span class="form-note">We'll reply by email.</span>
+  </div>
+</form>
+
+<script>
+  // Send people to our own thank-you page on whichever domain the site is served from.
+  document.querySelectorAll<HTMLInputElement>('[data-redirect]').forEach((el) => {
+    el.value = `${location.origin}/thanks/`;
+  });
+</script>

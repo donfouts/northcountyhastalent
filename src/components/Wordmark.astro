@@ -1,0 +1,56 @@
+---
+// Typeset logo. Swap this one component when a real logo arrives.
+import { themeName } from '../lib/theme';
+
+interface Props {
+  name: string;
+}
+const { name } = Astro.props;
+const split = name.match(/^(.*?)\s+(Has Talent)$/i);
+const [first, second] = split ? [split[1], split[2]] : [name, ''];
+---
+
+<span class={`wordmark wm-${themeName}`}>
+  {
+    themeName === 'garden' && (
+      <svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true">
+        <ellipse cx="18" cy="20" rx="11" ry="14" fill="#5E7D4A" />
+        <circle cx="18" cy="23" r="5" fill="#C9714B" />
+      </svg>
+    )
+  }
+  <span>{first} <span class="wm-accent">{second}{themeName === 'fair' && second ? '!' : ''}</span></span>
+</span>
+
+<style>
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1;
+  }
+  .wm-garden {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+    color: #3e5530;
+  }
+  .wm-fair {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.3rem, 2.8vw, 1.8rem);
+    color: #1f2a44;
+  }
+  .wm-fair .wm-accent {
+    color: #d93f2f;
+  }
+  .wm-marquee {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    letter-spacing: 0.06em;
+    color: #b8322a;
+  }
+  .wm-marquee .wm-accent {
+    color: #2a1a12;
+  }
+</style>

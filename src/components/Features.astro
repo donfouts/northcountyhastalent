@@ -1,0 +1,21 @@
+---
+interface Props {
+  items: { title: string; text: string }[];
+}
+const { items } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <section class="features section-tight" aria-label="What the evening includes">
+      <div class="container grid">
+        {items.map((f) => (
+          <div class="feature">
+            <span class="feature-title">{f.title}</span>
+            <span style="color: var(--ink-soft)">{f.text}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}

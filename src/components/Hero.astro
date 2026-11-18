@@ -1,0 +1,295 @@
+---
+// Homepage hero. Same content in every theme; the arrangement and motifs change per theme.
+import type { ImageMetadata } from 'astro';
+import { themeName } from '../lib/theme';
+import Media from './Media.astro';
+
+interface Cta {
+  href: string;
+  label: string;
+  variant?: 'primary' | 'secondary';
+}
+interface Props {
+  eyebrow: string;
+  title: string;
+  intro?: string;
+  when?: string;
+  ctas: Cta[];
+  image?: ImageMetadata;
+  imageAlt: string;
+  badgeLabel?: string;
+  badgeText?: string;
+}
+const { eyebrow, title, intro, when, ctas, image, imageAlt, badgeLabel, badgeText } = Astro.props;
+const bulbs = Array.from({ length: 28 });
+---
+
+{
+  themeName === 'garden' && (
+    <section class="hero hero-garden container">
+      <div class="hero-copy">
+        <svg width="220" height="18" viewBox="0 0 220 18" aria-hidden="true">
+          <path d="M0 4 Q55 16 110 6 T220 6" fill="none" stroke="#A8B79A" stroke-width="1.5" />
+          {[20, 60, 100, 140, 180].map((x, i) => (
+            <circle cx={x} cy={[8, 11, 7, 6, 8][i]} r="4" fill="#F2C46D" />
+          ))}
+        </svg>
+        <span class="eyebrow">{eyebrow}</span>
+        <h1>{title}</h1>
+        {intro && <p class="lead">{intro}</p>}
+        {when && <p class="when">{when}</p>}
+        <div class="btn-row">
+          {ctas.map((c) => (
+            <a class={`btn btn-${c.variant ?? 'primary'}`} href={c.href}>
+              {c.label}
+            </a>
+          ))}
+        </div>
+      </div>
+      <div class="hero-art">
+        <Media src={image} alt={imageAlt} placeholder={imageAlt} class="arch" loading="eager" sizes="(max-width: 860px) 100vw, 560px" />
+        {badgeText && (
+          <div class="badge">
+            <span>{badgeLabel}</span>
+            <strong>{badgeText}</strong>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+{
+  themeName === 'fair' && (
+    <div class="container">
+      <section class="hero hero-fair">
+        <svg class="confetti" width="160" height="80" viewBox="0 0 160 80" aria-hidden="true">
+          <rect x="10" y="20" width="10" height="10" rx="2" fill="#FF6B5B" transform="rotate(20 15 25)" />
+          <circle cx="60" cy="14" r="6" fill="#1FA5A0" />
+          <rect x="100" y="40" width="12" height="6" rx="3" fill="#FFC93C" transform="rotate(-30 106 43)" />
+          <circle cx="140" cy="60" r="5" fill="#FF6B5B" />
+          <rect x="40" y="58" width="10" height="5" rx="2.5" fill="#FFC93C" />
+        </svg>
+        <div class="hero-copy">
+          <span class="pill">{eyebrow}</span>
+          <h1>{title}</h1>
+          {intro && <p class="lead">{intro}</p>}
+          {when && <p class="when">{when}</p>}
+          <div class="btn-row">
+            {ctas.map((c) => (
+              <a class={`btn btn-${c.variant ?? 'primary'}`} href={c.href}>
+                {c.label}
+              </a>
+            ))}
+          </div>
+        </div>
+        <div class="hero-art">
+          <Media src={image} alt={imageAlt} placeholder={imageAlt} class="tilt" loading="eager" sizes="(max-width: 860px) 100vw, 520px" />
+          {badgeText && (
+            <div class="badge">
+              <span>{badgeLabel}</span>
+              <strong>{badgeText}</strong>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+{
+  themeName === 'marquee' && (
+    <section class="hero hero-marquee container">
+      <div class="sign">
+        <div class="bulbs" aria-hidden="true">
+          {bulbs.map(() => <span />)}
+        </div>
+        <div class="sign-face">
+          <span class="eyebrow">★ {eyebrow} ★</span>
+          <h1>{title}</h1>
+          {intro && <p class="lead">{intro}</p>}
+          {when && <p class="when">{when}</p>}
+          <div class="btn-row" style="justify-content: center;">
+            {ctas.map((c) => (
+              <a class={`btn btn-${c.variant ?? 'primary'}`} href={c.href}>
+                {c.label}
+              </a>
+            ))}
+          </div>
+        </div>
+        <div class="bulbs" aria-hidden="true">
+          {bulbs.map(() => <span />)}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .hero-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .when {
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* Garden */
+  .hero-garden {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: clamp(32px, 5vw, 56px);
+    align-items: center;
+    padding-block: clamp(40px, 7vw, 80px);
+  }
+  .hero-garden .hero-art {
+    position: relative;
+    padding-left: 32px;
+  }
+  .hero-garden :global(.arch) {
+    aspect-ratio: 5 / 6;
+    border-radius: 999px 999px 24px 24px;
+  }
+  .hero-garden .badge {
+    position: absolute;
+    left: 0;
+    bottom: 32px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 20px;
+    box-shadow: 0 8px 24px rgb(60 70 40 / 0.14);
+    display: flex;
+    flex-direction: column;
+  }
+  .hero-garden .badge span {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .hero-garden .badge strong {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: var(--heading);
+  }
+
+  /* Summer Fair */
+  .hero-fair {
+    position: relative;
+    margin-top: 8px;
+    background: var(--surface-2);
+    border-radius: 40px;
+    padding: clamp(28px, 5vw, 64px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+    gap: 40px;
+    align-items: center;
+    overflow: hidden;
+  }
+  .hero-fair h1 {
+    line-height: 0.98;
+  }
+  .confetti {
+    position: absolute;
+    right: 32px;
+    top: 20px;
+  }
+  @media (max-width: 600px) {
+    .confetti {
+      display: none;
+    }
+  }
+  .pill {
+    align-self: flex-start;
+    background: var(--ink);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    border-radius: 999px;
+  }
+  .hero-fair .hero-art {
+    position: relative;
+  }
+  .hero-fair :global(.tilt) {
+    aspect-ratio: 1 / 1;
+    border-radius: 32px;
+    transform: rotate(-2.5deg);
+    box-shadow: 0 0 0 8px #fff;
+  }
+  .hero-fair .badge {
+    position: absolute;
+    right: -4px;
+    bottom: -8px;
+    background: #ffc93c;
+    color: #1f2a44;
+    border-radius: 20px;
+    padding: 12px 18px;
+    transform: rotate(3deg);
+    display: flex;
+    flex-direction: column;
+    font-weight: 800;
+  }
+  .hero-fair .badge span {
+    font-size: 0.8rem;
+  }
+
+  /* Vintage Marquee */
+  .hero-marquee {
+    padding-block: clamp(32px, 6vw, 64px);
+  }
+  .sign {
+    max-width: 1000px;
+    margin-inline: auto;
+    background: #b8322a;
+    border-radius: 28px;
+    padding: clamp(10px, 2vw, 18px);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .bulbs {
+    display: flex;
+    justify-content: space-between;
+    padding-inline: 6px;
+    overflow: hidden;
+    gap: 6px;
+  }
+  .bulbs span {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffe7a3;
+    box-shadow: 0 0 8px #ffd36b;
+    animation: twinkle 2.4s infinite;
+  }
+  .bulbs span:nth-child(odd) {
+    animation-delay: 1.2s;
+  }
+  @keyframes twinkle {
+    50% {
+      opacity: 0.55;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bulbs span {
+      animation: none;
+    }
+  }
+  .sign-face {
+    background: var(--bg);
+    border-radius: 14px;
+    padding: clamp(28px, 5vw, 48px) clamp(20px, 5vw, 56px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 18px;
+  }
+  .sign-face .lead {
+    margin-inline: auto;
+  }
+</style>

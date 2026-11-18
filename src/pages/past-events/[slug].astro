@@ -1,0 +1,104 @@
+---
+import { render } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Layout from '../../layouts/Layout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import PerformerCard from '../../components/PerformerCard.astro';
+import { getEvents, getPerformers, formatDate } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const { past } = await getEvents();
+  return past.map((e) => ({ params: { slug: e.id }, props: { event: e } }));
+}
+
+const { event } = Astro.props;
+const e = event.data;
+const { Content } = await render(event);
+const performers = await getPerformers(event.id);
+// Full-size versions for the lightbox (capped at 1800px wide).
+const large = await Promise.all(e.gallery.map((g) => getImage({ src: g.image, width: Math.min(1800, g.image.width) })));
+---
+
+<Layout title={e.title} description={`Photos from ${e.title}`}>
+  <PageHeader
+    eyebrow={[formatDate(e.date), e.venue].filter(Boolean).join(' · ')}
+    title={e.title}
+  />
+
+  <section class="section" style="padding-top: 24px;">
+    <div class="container stack" style="gap: 40px;">
+      <div class="prose"><Content /></div>
+
+      {
+        e.gallery.length > 0 && (
+          <div class="gallery" data-gallery>
+            {e.gallery.map((g, i) => (
+              <button type="button" data-full={large[i].src} data-caption={g.caption ?? ''} aria-label={`Open photo ${i + 1}${g.caption ? `: ${g.caption}` : ''}`}>
+                <Image src={g.image} alt={g.caption ?? `Photo ${i + 1} from ${e.title}`} widths={[400, 800]} sizes="(max-width: 700px) 100vw, 400px" />
+              </button>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        performers.length > 0 && (
+          <div class="stack">
+            <h2>Who performed</h2>
+            <div class="grid">
+              {performers.map((p) => (
+                <PerformerCard performer={p} />
+              ))}
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <dialog class="lightbox" aria-label="Photo viewer">
+    <figure style="margin: 0;">
+      <img alt="" />
+      <figcaption></figcaption>
+    </figure>
+    <div class="lightbox-controls">
+      <button type="button" data-prev aria-label="Previous photo">←</button>
+      <button type="button" data-close>Close</button>
+      <button type="button" data-next aria-label="Next photo">→</button>
+    </div>
+  </dialog>
+</Layout>
+
+<script>
+  const gallery = document.querySelector<HTMLElement>('[data-gallery]');
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.lightbox');
+  if (gallery && dialog) {
+    const items = Array.from(gallery.querySelectorAll<HTMLButtonElement>('button'));
+    const img = dialog.querySelector('img')!;
+    const cap = dialog.querySelector('figcaption')!;
+    let index = 0;
+    const show = (i: number) => {
+      index = (i + items.length) % items.length;
+      const b = items[index];
+      img.src = b.dataset.full!;
+      img.alt = b.querySelector('img')?.alt ?? '';
+      cap.textContent = b.dataset.caption ?? '';
+    };
+    items.forEach((b, i) =>
+      b.addEventListener('click', () => {
+        show(i);
+        dialog.showModal();
+      }),
+    );
+    dialog.querySelector('[data-prev]')!.addEventListener('click', () => show(index - 1));
+    dialog.querySelector('[data-next]')!.addEventListener('click', () => show(index + 1));
+    dialog.querySelector('[data-close]')!.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (ev) => {
+      if (ev.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('keydown', (ev) => {
+      if (ev.key === 'ArrowLeft') show(index - 1);
+      if (ev.key === 'ArrowRight') show(index + 1);
+    });
+  }
+</script>

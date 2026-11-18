@@ -1,0 +1,18 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - nvm install 22 && nvm use 22
+        - npm ci
+    build:
+      commands:
+        # PUBLIC_THEME (garden | fair | marquee) and PUBLIC_WEB3FORMS_KEY are set per Amplify app
+        - npm run build
+  artifacts:
+    baseDirectory: dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*

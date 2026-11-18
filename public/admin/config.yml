@@ -1,0 +1,212 @@
+# Sveltia CMS configuration: the host's editing panel at /admin
+# Docs: https://github.com/sveltia/sveltia-cms
+
+backend:
+  name: github
+  repo: donfouts/northcountyhastalent
+  branch: main
+  # GitHub OAuth helper (deploy https://github.com/sveltia/sveltia-cms-auth, then paste its URL here).
+  # Until then, sign in with a GitHub personal access token from the login screen.
+  # base_url: https://ncht-cms-auth.<account>.workers.dev
+  commit_messages:
+    create: 'Add {{collection}} "{{slug}}"'
+    update: 'Update {{collection}} "{{slug}}"'
+    delete: 'Remove {{collection}} "{{slug}}"'
+    uploadMedia: 'Upload "{{path}}"'
+    deleteMedia: 'Delete "{{path}}"'
+
+# Uploaded photos are stored with the site and automatically resized/optimized at build time.
+media_folder: src/assets/uploads
+public_folder: ../../assets/uploads
+
+site_url: https://northcountyhastalent.com
+display_url: https://northcountyhastalent.com
+
+slug:
+  encoding: ascii
+  clean_accents: true
+
+collections:
+  # ------------------------------------------------------------------
+  - name: performers
+    label: Performers
+    label_singular: Performer
+    description: Acts shown on the Performers page. Link each one to the event(s) they played.
+    folder: src/content/performers
+    extension: md
+    format: frontmatter
+    create: true
+    identifier_field: name
+    slug: '{{name}}'
+    summary: '{{name}} · {{genre}}'
+    sortable_fields: [order, name]
+    fields:
+      - { name: name, label: Name / act name, widget: string }
+      - { name: photo, label: Photo, widget: image, required: false, hint: 'Portrait photos look best (4:5).' }
+      - { name: genre, label: Genre, widget: string, required: false, hint: 'e.g. Country · Americana' }
+      - { name: shortBio, label: One-line description, widget: string, required: false }
+      - { name: lineup, label: Band members / lineup, widget: string, required: false }
+      - { name: website, label: Website, widget: string, required: false }
+      - { name: instagram, label: Instagram URL, widget: string, required: false }
+      - { name: facebook, label: Facebook URL, widget: string, required: false }
+      - { name: tiktok, label: TikTok URL, widget: string, required: false }
+      - { name: youtube, label: YouTube channel URL, widget: string, required: false }
+      - { name: video, label: Performance video (YouTube link), widget: string, required: false, hint: 'Embedded on their page.' }
+      - name: events
+        label: Performed at
+        widget: relation
+        collection: events
+        value_field: '{{slug}}'
+        search_fields: [title]
+        display_fields: [title]
+        multiple: true
+        required: false
+      - { name: order, label: Sort order, widget: number, value_type: int, default: 100, hint: 'Lower numbers show first.' }
+      - { name: draft, label: Hide from site, widget: boolean, default: false }
+      - { name: body, label: Full bio, widget: markdown }
+
+  # ------------------------------------------------------------------
+  - name: sponsors
+    label: Sponsors
+    label_singular: Sponsor
+    folder: src/content/sponsors
+    extension: md
+    format: frontmatter
+    create: true
+    identifier_field: name
+    slug: '{{name}}'
+    summary: '{{name}} ({{tier}})'
+    sortable_fields: [order, name]
+    fields:
+      - { name: name, label: Business name, widget: string }
+      - { name: logo, label: Logo, widget: image, required: false, hint: 'PNG with transparent background works best.' }
+      - { name: tier, label: Tier, widget: select, options: [Presenting, Gold, Community], default: Community }
+      - { name: website, label: Website, widget: string, required: false }
+      - name: events
+        label: Sponsored
+        widget: relation
+        collection: events
+        value_field: '{{slug}}'
+        search_fields: [title]
+        display_fields: [title]
+        multiple: true
+        required: false
+      - { name: order, label: Sort order, widget: number, value_type: int, default: 100 }
+      - { name: draft, label: Hide from site, widget: boolean, default: false }
+      - { name: body, label: About this sponsor, widget: markdown, required: false }
+
+  # ------------------------------------------------------------------
+  - name: events
+    label: Events
+    label_singular: Event
+    description: >-
+      One entry per show. Mark the next show "upcoming" (it drives the homepage and Tickets page)
+      and finished shows "past" (they appear under Past Events with their photo gallery).
+    folder: src/content/events
+    extension: md
+    format: frontmatter
+    create: true
+    identifier_field: title
+    slug: '{{year}}-{{fields.slugHint}}'
+    summary: '{{title}} · {{status}}'
+    sortable_fields: [year, title]
+    fields:
+      - { name: title, label: Event name, widget: string, hint: 'e.g. 2027 North County Has Talent' }
+      - { name: slugHint, label: Short web name, widget: string, required: false, hint: 'Used in the page address, e.g. "fallbrook". Only used when creating.' }
+      - { name: year, label: Year, widget: number, value_type: int }
+      - { name: status, label: Status, widget: select, options: [upcoming, past], default: upcoming }
+      - { name: date, label: Date, widget: datetime, time_format: false, format: 'YYYY-MM-DD', required: false }
+      - { name: dateText, label: Date text (when no date yet), widget: string, required: false, default: Date coming soon }
+      - { name: time, label: Time, widget: string, required: false, hint: 'e.g. 4 – 8 PM' }
+      - { name: venue, label: Venue, widget: string, required: false }
+      - { name: address, label: Address / location note, widget: string, required: false }
+      - { name: ageNote, label: Age note, widget: string, required: false }
+      - { name: auditionsOpen, label: Auditions open?, widget: boolean, default: false }
+      - { name: ticketsOnSale, label: Tickets on sale?, widget: boolean, default: false }
+      - { name: tixfoxUrl, label: TixFox ticket link, widget: string, required: false }
+      - name: ticketTiers
+        label: Ticket options
+        widget: list
+        required: false
+        summary: '{{name}}: {{price}}'
+        fields:
+          - { name: name, label: Name, widget: string }
+          - { name: price, label: Price, widget: string, hint: 'e.g. $75 or From $600' }
+          - { name: note, label: Note, widget: string, required: false }
+          - { name: includes, label: Includes, widget: list, field: { name: item, label: Item, widget: string } }
+      - name: ticketPolicies
+        label: Ticket policies
+        widget: list
+        required: false
+        field: { name: policy, label: Policy, widget: string }
+      - name: features
+        label: Evening highlights
+        widget: list
+        required: false
+        summary: '{{title}}'
+        fields:
+          - { name: title, label: Title, widget: string }
+          - { name: text, label: Text, widget: string }
+      - { name: cover, label: Cover photo, widget: image, required: false }
+      - name: gallery
+        label: Photo gallery
+        widget: list
+        required: false
+        summary: '{{caption}}'
+        fields:
+          - { name: image, label: Photo, widget: image }
+          - { name: caption, label: Caption, widget: string, required: false }
+      - { name: body, label: Recap / description, widget: markdown, required: false }
+
+  # ------------------------------------------------------------------
+  - name: beneficiaries
+    label: Charities
+    label_singular: Charity
+    folder: src/content/beneficiaries
+    extension: md
+    format: frontmatter
+    create: true
+    identifier_field: name
+    slug: '{{name}}'
+    fields:
+      - { name: name, label: Name, widget: string }
+      - { name: logo, label: Logo, widget: image, required: false }
+      - { name: blurb, label: Short description, widget: text }
+      - { name: website, label: Website, widget: string, required: false }
+      - { name: order, label: Sort order, widget: number, value_type: int, default: 100 }
+
+  # ------------------------------------------------------------------
+  - name: pages
+    label: Page text
+    description: Headlines and copy for each page.
+    files:
+      - { name: home, label: Home, file: src/content/pages/home.md, fields: &pageFields [
+            { name: eyebrow, label: Small label above title, widget: string, required: false },
+            { name: title, label: Title, widget: string },
+            { name: intro, label: Intro, widget: text, required: false },
+            { name: body, label: Body, widget: markdown, required: false },
+          ] }
+      - { name: performers, label: Performers, file: src/content/pages/performers.md, fields: *pageFields }
+      - { name: tickets, label: Tickets (shown when not on sale), file: src/content/pages/tickets.md, fields: *pageFields }
+      - { name: sponsors, label: Sponsors, file: src/content/pages/sponsors.md, fields: *pageFields }
+      - { name: past-events, label: Past Events, file: src/content/pages/past-events.md, fields: *pageFields }
+      - { name: audition, label: Audition, file: src/content/pages/audition.md, fields: *pageFields }
+
+  # ------------------------------------------------------------------
+  - name: settings
+    label: Site settings
+    files:
+      - name: site
+        label: General
+        file: src/content/settings/site.json
+        format: json
+        fields:
+          - { name: siteName, label: Site name, widget: string }
+          - { name: tagline, label: Tagline, widget: string }
+          - { name: announcement, label: Announcement bar (optional), widget: string, required: false, hint: 'Shows a banner across the top of every page.' }
+          - { name: contactEmail, label: Contact email, widget: string }
+          - { name: sponsorPhone, label: Sponsorship phone, widget: string, required: false }
+          - { name: donateUrl, label: Donate link, widget: string, required: false }
+          - { name: instagram, label: Instagram URL, widget: string, required: false }
+          - { name: facebook, label: Facebook URL, widget: string, required: false }
+          - { name: productionCredit, label: Production credit, widget: string, required: false }

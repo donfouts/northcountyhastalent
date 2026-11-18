@@ -1,0 +1,13 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHeader from '../components/PageHeader.astro';
+---
+
+<Layout title="Page not found">
+  <PageHeader eyebrow="404" title="This act isn't on the program." intro="The page you're looking for doesn't exist or has moved.">
+    <div class="btn-row" style="margin-top: 24px;">
+      <a class="btn btn-primary" href="/">Back to home</a>
+      <a class="btn btn-secondary" href="/performers/">See the performers</a>
+    </div>
+  </PageHeader>
+</Layout>

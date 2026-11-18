@@ -1,0 +1,43 @@
+---
+import { getSettings, getBeneficiaries } from '../lib/content';
+
+const s = await getSettings();
+const beneficiaries = await getBeneficiaries();
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="stack" style="gap: 8px; max-width: 420px;">
+      <span class="footer-brand">{s.siteName}</span>
+      <span>{s.tagline}</span>
+      {
+        beneficiaries.length > 0 && (
+          <span>
+            Benefiting{' '}
+            {beneficiaries.map((b, i) => (
+              <>
+                {i > 0 && (i === beneficiaries.length - 1 ? ' and ' : ', ')}
+                {b.data.website ? <a href={b.data.website}>{b.data.name}</a> : b.data.name}
+              </>
+            ))}
+          </span>
+        )
+      }
+    </div>
+    <div class="stack" style="gap: 8px;">
+      <a href={`mailto:${s.contactEmail}`}>{s.contactEmail}</a>
+      {s.sponsorPhone && <a href={`tel:${s.sponsorPhone.replace(/\D/g, '')}`}>Sponsorships: {s.sponsorPhone}</a>}
+      <ul class="footer-links">
+        {s.donateUrl && <li><a href={s.donateUrl}>Donate</a></li>}
+        {s.instagram && <li><a href={s.instagram}>Instagram</a></li>}
+        {s.facebook && <li><a href={s.facebook}>Facebook</a></li>}
+        <li><a href="/audition/">Audition</a></li>
+        <li><a href="/sponsors/#become-a-sponsor">Become a sponsor</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container" style="margin-top: 24px; opacity: 0.85; font-size: 0.85rem;">
+    © {year} {s.siteName}. {s.productionCredit}
+  </div>
+</footer>

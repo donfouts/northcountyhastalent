@@ -1,0 +1,96 @@
+---
+import { render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Media from '../../components/Media.astro';
+import { getPerformers, getEvents, youtubeId } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const performers = await getPerformers();
+  return performers.map((p) => ({ params: { slug: p.id }, props: { performer: p } }));
+}
+
+const { performer } = Astro.props;
+const p = performer.data;
+const { Content } = await render(performer);
+const { all } = await getEvents();
+const appeared = all.filter((e) => p.events.includes(e.id)).sort((a, b) => b.data.year - a.data.year);
+const vid = youtubeId(p.video);
+const links = [
+  { label: 'Website', href: p.website },
+  { label: 'Instagram', href: p.instagram },
+  { label: 'Facebook', href: p.facebook },
+  { label: 'TikTok', href: p.tiktok },
+  { label: 'YouTube', href: p.youtube },
+].filter((l) => l.href);
+---
+
+<Layout title={p.name} description={p.shortBio}>
+  <section class="section">
+    <div class="container">
+      <a href="/performers/" class="more-link">← All performers</a>
+      <div class="detail">
+        <Media src={p.photo} alt={`Photo of ${p.name}`} placeholder="Performer photo" loading="eager" sizes="(max-width: 860px) 100vw, 480px" />
+        <div class="stack">
+          {p.genre && <span class="eyebrow">{p.genre}</span>}
+          <h1>{p.name}</h1>
+          {p.lineup && <p style="font-weight: 600;">{p.lineup}</p>}
+          <div class="prose"><Content /></div>
+          {
+            links.length > 0 && (
+              <ul class="social">
+                {links.map((l) => (
+                  <li>
+                    <a href={l.href} rel="noopener">
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )
+          }
+          {
+            appeared.length > 0 && (
+              <p style="color: var(--muted)">
+                Performed at: {appeared.map((e, i) => (
+                  <>
+                    {i > 0 && ', '}
+                    <a href={e.data.status === 'past' ? `/past-events/${e.id}/` : '/'}>{e.data.title}</a>
+                  </>
+                ))}
+              </p>
+            )
+          }
+        </div>
+      </div>
+      {
+        vid && (
+          <div style="margin-top: 48px;" class="stack">
+            <h2>Watch</h2>
+            <div class="video">
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${vid}`}
+                title={`${p.name} performance video`}
+                loading="lazy"
+                allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              />
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .detail {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: clamp(28px, 5vw, 56px);
+    align-items: start;
+  }
+  .detail :global(.media) {
+    border-radius: var(--radius);
+  }
+</style>

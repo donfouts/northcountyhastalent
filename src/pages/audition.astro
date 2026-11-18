@@ -1,0 +1,77 @@
+---
+import { render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Web3Form from '../components/Web3Form.astro';
+import { getPage, getEvents } from '../lib/content';
+
+const page = await getPage('audition');
+const { Content } = await render(page);
+const { current } = await getEvents();
+const open = current?.data.auditionsOpen ?? false;
+---
+
+<Layout title="Audition" description={page.data.intro}>
+  <PageHeader eyebrow={page.data.eyebrow} title={page.data.title} intro={page.data.intro} />
+
+  <section class="section" style="padding-top: 24px;">
+    <div class="container grid-2" style="align-items: start;">
+      <div class="prose"><Content /></div>
+
+      {
+        open ? (
+          <Web3Form subject="New audition submission: North County Has Talent" id="audition-form" submitLabel="Submit audition">
+            <div class="field full">
+              <label for="au-act">Name or act / band name *</label>
+              <input id="au-act" name="act_name" required />
+            </div>
+            <div class="field">
+              <label for="au-contact">Contact person *</label>
+              <input id="au-contact" name="name" required autocomplete="name" />
+            </div>
+            <div class="field">
+              <label for="au-email">Email *</label>
+              <input id="au-email" name="email" type="email" required autocomplete="email" />
+            </div>
+            <div class="field">
+              <label for="au-phone">Phone</label>
+              <input id="au-phone" name="phone" type="tel" autocomplete="tel" />
+            </div>
+            <div class="field">
+              <label for="au-genre">Genre / type of act *</label>
+              <input id="au-genre" name="genre" required placeholder="e.g. Country, comedy, dance" />
+            </div>
+            <div class="field full">
+              <label for="au-video">Performance video link *</label>
+              <input id="au-video" name="video_link" type="url" required placeholder="https://youtube.com/…" />
+              <span class="hint">Must be publicly viewable (unlisted YouTube is fine).</span>
+            </div>
+            <div class="field full">
+              <label for="au-photo">Photo link *</label>
+              <input id="au-photo" name="photo_link" type="url" required placeholder="https://" />
+              <span class="hint">A link to a still photo of you or your act (Instagram post, Google Drive, Dropbox…).</span>
+            </div>
+            <div class="field full">
+              <label for="au-links">Website & social links</label>
+              <textarea id="au-links" name="links" style="min-height: 90px;" placeholder="One per line" />
+            </div>
+            <div class="field full">
+              <label for="au-bio">Short bio *</label>
+              <textarea id="au-bio" name="bio" required maxlength="800" />
+              <span class="hint">2–4 sentences about you or your act.</span>
+            </div>
+            <label class="check full">
+              <input type="checkbox" name="consent" value="yes" required />
+              <span>I confirm the video and photo links are mine to share and may be reviewed by the event team.</span>
+            </label>
+          </Web3Form>
+        ) : (
+          <div class="band-card outline">
+            <h2 style="font-size: 1.6rem;">Auditions are closed for now</h2>
+            <p>Check back when the next show is announced.</p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+</Layout>

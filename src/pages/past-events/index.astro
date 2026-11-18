@@ -1,0 +1,42 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Media from '../../components/Media.astro';
+import { getPage, getEvents, formatDate } from '../../lib/content';
+
+const page = await getPage('past-events');
+const { past } = await getEvents();
+---
+
+<Layout title="Past Events" description={page.data.intro}>
+  <PageHeader eyebrow={page.data.eyebrow} title={page.data.title} intro={page.data.intro} />
+  <section class="section" style="padding-top: 24px;">
+    <div class="container grid-2">
+      {
+        past.map((e) => (
+          <article class="card">
+            <a class="cover-link" href={`/past-events/${e.id}/`}>
+              <Media
+                class="wide"
+                src={e.data.cover ?? e.data.gallery[0]?.image}
+                alt={`Photo from ${e.data.title}`}
+                placeholder="Gallery coming soon"
+                sizes="(max-width: 860px) 100vw, 580px"
+              />
+              <div class="card-body">
+                <span class="eyebrow" style="margin: 0;">
+                  {[formatDate(e.data.date), e.data.venue].filter(Boolean).join(' · ')}
+                </span>
+                <span class="card-title">{e.data.title}</span>
+                <span style="color: var(--muted)">
+                  {e.data.gallery.length ? `${e.data.gallery.length} photos` : 'Photos coming soon'}
+                </span>
+              </div>
+            </a>
+          </article>
+        ))
+      }
+      {past.length === 0 && <p class="lead">Our first show is coming up. Check back for photos!</p>}
+    </div>
+  </section>
+</Layout>

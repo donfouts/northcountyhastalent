@@ -1,0 +1,105 @@
+---
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Web3Form from '../components/Web3Form.astro';
+import { getPage, getFeaturedEvent, getSponsors, getSettings } from '../lib/content';
+
+const page = await getPage('sponsors');
+const { Content } = await render(page);
+const s = await getSettings();
+const featured = await getFeaturedEvent();
+const sponsors = featured ? await getSponsors(featured.id) : [];
+const tiers = (['Presenting', 'Gold', 'Community'] as const)
+  .map((t) => ({ tier: t, items: sponsors.filter((sp) => sp.data.tier === t) }))
+  .filter((g) => g.items.length);
+---
+
+<Layout title="Sponsors" description={page.data.intro}>
+  <PageHeader eyebrow={page.data.eyebrow} title={page.data.title} intro={page.data.intro} />
+
+  <section class="section" style="padding-top: 24px;">
+    <div class="container stack" style="gap: 40px;">
+      {
+        tiers.map((g) => (
+          <div class="stack">
+            {tiers.length > 1 && <h2 style="font-size: 1.6rem;">{g.tier} sponsors</h2>}
+            <div class="grid">
+              {g.items.map(async (sp) => {
+                const { Content: Bio } = await render(sp);
+                return (
+                  <article class="card">
+                    <div class="logo-tile" style="min-height: 140px; border-radius: 0;">
+                      {sp.data.logo ? <Image src={sp.data.logo} alt={sp.data.name} height={200} /> : <span>{sp.data.name}</span>}
+                    </div>
+                    <div class="card-body">
+                      <span class="card-title">{sp.data.name}</span>
+                      <div class="prose" style="font-size: 0.95rem;">
+                        <Bio />
+                      </div>
+                      {sp.data.website && (
+                        <a href={sp.data.website} rel="noopener">
+                          Visit website →
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section" id="become-a-sponsor" style="background: var(--surface-2);">
+    <div class="container grid-2" style="align-items: start;">
+      <div class="prose">
+        <Content />
+        {s.sponsorPhone && (
+          <p>
+            Prefer to talk? Call <a href={`tel:${s.sponsorPhone.replace(/\D/g, '')}`}>{s.sponsorPhone}</a>.
+          </p>
+        )}
+      </div>
+      <Web3Form subject="New sponsor inquiry: North County Has Talent" id="sponsor-form" submitLabel="Send inquiry">
+        <div class="field">
+          <label for="sp-company">Business / organization *</label>
+          <input id="sp-company" name="company" required autocomplete="organization" />
+        </div>
+        <div class="field">
+          <label for="sp-name">Contact name *</label>
+          <input id="sp-name" name="name" required autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="sp-email">Email *</label>
+          <input id="sp-email" name="email" type="email" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="sp-phone">Phone</label>
+          <input id="sp-phone" name="phone" type="tel" autocomplete="tel" />
+        </div>
+        <div class="field full">
+          <label for="sp-website">Website</label>
+          <input id="sp-website" name="website" type="url" placeholder="https://" />
+        </div>
+        <div class="field full">
+          <label for="sp-interest">Interested in</label>
+          <select id="sp-interest" name="interest">
+            <option>Not sure yet: tell me about packages</option>
+            <option>Presenting sponsor</option>
+            <option>Gold sponsor</option>
+            <option>Community sponsor</option>
+            <option>In-kind donation (auction item, food, services)</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="sp-message">Message</label>
+          <textarea id="sp-message" name="message"></textarea>
+        </div>
+      </Web3Form>
+    </div>
+  </section>
+</Layout>

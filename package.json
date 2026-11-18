@@ -1,0 +1,21 @@
+{
+  "name": "northcountyhastalent",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "dev:garden": "cross-env PUBLIC_THEME=garden astro dev",
+    "dev:fair": "cross-env PUBLIC_THEME=fair astro dev",
+    "dev:marquee": "cross-env PUBLIC_THEME=marquee astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "astro": "~5.18.2"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
+  }
+}

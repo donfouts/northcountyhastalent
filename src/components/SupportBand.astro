@@ -1,0 +1,50 @@
+---
+// Beneficiaries + donate on one side, sponsor logo wall on the other.
+import { Image } from 'astro:assets';
+import { getBeneficiaries, getSettings, type Sponsor } from '../lib/content';
+
+interface Props {
+  sponsors: Sponsor[];
+}
+const { sponsors } = Astro.props;
+const s = await getSettings();
+const beneficiaries = await getBeneficiaries();
+const names = beneficiaries.map((b) => b.data.name).join(' & ');
+---
+
+<section class="support section">
+  <div class="container grid-2">
+    <div class="band-card solid">
+      <span class="eyebrow">Every ticket supports</span>
+      <h3 style="font-size: clamp(1.6rem, 3vw, 2rem);">{names}</h3>
+      <div class="stack" style="gap: 8px;">
+        {
+          beneficiaries.map((b) => (
+            <p>
+              {b.data.website ? <a href={b.data.website}>{b.data.name}</a> : <strong>{b.data.name}</strong>}: {b.data.blurb}
+            </p>
+          ))
+        }
+      </div>
+      {s.donateUrl && <a class="btn btn-secondary" style="align-self: flex-start" href={s.donateUrl}>Donate</a>}
+    </div>
+    <div class="band-card outline">
+      <span class="eyebrow">Thank you, sponsors</span>
+      <div class="logo-wall">
+        {
+          sponsors.map((sp) => {
+            const inner = sp.data.logo ? <Image src={sp.data.logo} alt={sp.data.name} height={104} /> : sp.data.name;
+            return sp.data.website ? (
+              <a class="logo-tile" href={sp.data.website}>
+                {inner}
+              </a>
+            ) : (
+              <div class="logo-tile">{inner}</div>
+            );
+          })
+        }
+        <a class="logo-tile cta" href="/sponsors/#become-a-sponsor">Your logo here</a>
+      </div>
+    </div>
+  </div>
+</section>

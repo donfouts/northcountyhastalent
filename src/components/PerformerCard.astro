@@ -1,0 +1,20 @@
+---
+import type { Performer } from '../lib/content';
+import Media from './Media.astro';
+
+interface Props {
+  performer: Performer;
+}
+const { performer } = Astro.props;
+const p = performer.data;
+---
+
+<article class="card">
+  <a class="cover-link" href={`/performers/${performer.id}/`}>
+    <Media src={p.photo} alt={`Photo of ${p.name}`} placeholder="Performer photo" />
+    <div class="card-body">
+      <span class="card-title">{p.name}</span>
+      {p.genre && <span class="tag">{p.genre}</span>}
+    </div>
+  </a>
+</article>

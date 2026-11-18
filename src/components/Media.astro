@@ -1,0 +1,36 @@
+---
+// An optimized image, or a labelled placeholder when the host hasn't uploaded one yet.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src?: ImageMetadata;
+  alt: string;
+  placeholder?: string;
+  class?: string;
+  widths?: number[];
+  sizes?: string;
+  loading?: 'lazy' | 'eager';
+}
+const {
+  src,
+  alt,
+  placeholder = 'Photo coming soon',
+  class: cls = '',
+  widths = [400, 800, 1200],
+  sizes = '(max-width: 700px) 100vw, 400px',
+  loading = 'lazy',
+} = Astro.props;
+---
+
+<div class={`media ${cls}`}>
+  {
+    src ? (
+      <Image src={src} alt={alt} widths={widths} sizes={sizes} loading={loading} />
+    ) : (
+      <div class="placeholder" role="img" aria-label={alt}>
+        {placeholder}
+      </div>
+    )
+  }
+</div>

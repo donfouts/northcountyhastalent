@@ -1,0 +1,75 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Features from '../components/Features.astro';
+import PerformerCard from '../components/PerformerCard.astro';
+import SupportBand from '../components/SupportBand.astro';
+import {
+  getPage,
+  getEvents,
+  getFeaturedEvent,
+  getPerformers,
+  getSponsors,
+  eventWhen,
+  formatDate,
+} from '../lib/content';
+
+const home = await getPage('home');
+const { current, latestPast } = await getEvents();
+const featured = await getFeaturedEvent();
+const lineup = featured ? await getPerformers(featured.id) : [];
+const sponsors = featured ? await getSponsors(featured.id) : [];
+
+const ctas = [];
+if (current?.data.ticketsOnSale) ctas.push({ href: '/tickets/', label: 'Get tickets', variant: 'primary' as const });
+if (current?.data.auditionsOpen)
+  ctas.push({ href: '/audition/', label: 'Audition to perform', variant: ctas.length ? ('secondary' as const) : ('primary' as const) });
+ctas.push({ href: '/sponsors/#become-a-sponsor', label: 'Become a sponsor', variant: 'secondary' as const });
+
+const heroImage = latestPast?.data.cover ?? latestPast?.data.gallery[0]?.image;
+const eyebrow = current ? `${home.data.eyebrow ?? 'Save the date'} · ${current.data.year}` : (home.data.eyebrow ?? '');
+const when = current ? [eventWhen(current), current.data.venue].filter(Boolean).join(' · ') : undefined;
+const lastYear = latestPast
+  ? [formatDate(latestPast.data.date)?.replace(/^\w+, /, ''), latestPast.data.venue].filter(Boolean).join(' · ')
+  : undefined;
+const lineupLabel = featured?.data.status === 'upcoming' ? `${featured.data.year} lineup` : `The ${featured?.data.year} lineup`;
+---
+
+<Layout>
+  <Hero
+    eyebrow={eyebrow}
+    title={home.data.title}
+    intro={home.data.intro}
+    when={when}
+    ctas={ctas}
+    image={heroImage}
+    imageAlt={latestPast ? `Photo from ${latestPast.data.title}` : 'Event photo'}
+    badgeLabel="Last show"
+    badgeText={lastYear}
+  />
+
+  <Features items={(current ?? featured)?.data.features ?? []} />
+
+  {
+    lineup.length > 0 && (
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">{lineupLabel}</span>
+              <h2>Meet the performers</h2>
+            </div>
+            <a class="more-link" href="/performers/">See all bios →</a>
+          </div>
+          <div class="grid">
+            {lineup.map((p) => (
+              <PerformerCard performer={p} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <SupportBand sponsors={sponsors} />
+</Layout>
